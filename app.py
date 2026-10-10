@@ -6,14 +6,16 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 
+allowed_origins = [
+    "http://localhost:5500",
+    "http://127.0.0.1:5500"
+]
+
 CORS(app, resources={
-    r"/save": {
-        "origins": [
-            "http://localhost:5500",
-            "http://127.0.0.1:5500"
-        ]
-    }
+    r"/save": {"origins": allowed_origins},
+    r"/read": {"origins": allowed_origins}
 })
+
 
 DATA_FILE = Path(__file__).with_name("data.txt")
 
@@ -34,6 +36,17 @@ def save_text():
         file.write(text.strip() + "\n")
 
     return jsonify({"message": "Текст успешно сохранён"})
+
+
+@app.route("/read", methods=["GET"])
+def read_text():
+    if not DATA_FILE.exists():
+        return jsonify({"content": ""})
+
+    content = DATA_FILE.read_text(encoding="utf-8")
+
+    return jsonify({"content": content})
+
 
 
 if __name__ == "__main__":
